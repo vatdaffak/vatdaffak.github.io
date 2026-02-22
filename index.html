@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doly.fun 🎀</title>
+    <style>
+        :root {
+            --primary: #ff85a2; 
+            --secondary: #a3d8f4;
+            --text: #4a4a4a;
+            --font: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+        }
+
+        /* --- ✨ FUN ANIMATIONS --- */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+        }
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+
+        body { 
+            background: linear-gradient(-45deg, #ffe6f2, #fff0f5, #e6e6fa, #ffe6f2);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text); 
+            font-family: var(--font); 
+            margin: 0; padding: 20px; 
+            display: flex; justify-content: center; 
+            overflow-x: hidden;
+        }
+
+        .container { max-width: 500px; width: 100%; display: flex; flex-direction: column; gap: 15px; position: relative; }
+
+        .card { 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 25px; padding: 20px; 
+            box-shadow: 0 8px 32px 0 rgba(255, 133, 162, 0.2); 
+            border: 2px solid #fff;
+            backdrop-filter: blur(4px);
+            transition: transform 0.2s;
+        }
+        
+        h2 { margin-top: 0; color: var(--primary); font-size: 1.3rem; margin-bottom: 10px;}
+        
+        .btn { 
+            background: var(--primary); color: white; border: none; padding: 12px; border-radius: 15px; 
+            font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; 
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1); text-decoration: none; display: inline-block; text-align: center;
+            transition: transform 0.1s;
+        }
+        .btn:hover { animation: wiggle 0.3s ease-in-out infinite; }
+        .btn:active { transform: scale(0.95) !important; animation: none; }
+
+        #emoji-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
+        .floating-emoji { position: absolute; font-size: 2rem; animation: floatUp 2s ease-out forwards; }
+
+        input, select, textarea {
+            width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px;
+            border: 2px solid #eee; font-family: inherit; box-sizing: border-box; resize: vertical;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; }
+        
+        .wishlist-item { 
+            display: flex; align-items: center; 
+            background: #fffbfd; padding: 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #eee;
+        }
+        .rank-num {
+            background: var(--primary); color: white; width: 25px; height: 25px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: bold; margin-right: 10px; flex-shrink: 0;
+        }
+
+        .wishlist-add-box { display: flex; gap: 5px; margin-top: 10px; }
+        .wishlist-add-box input { margin-bottom: 0; }
+        .wishlist-add-box button { margin-top: 0; width: auto; padding: 0 20px; }
+
+        .routine-list { display: flex; flex-direction: column; gap: 8px; }
+        .routine-item { 
+            background: #fff; padding: 10px 15px; border-radius: 12px; border: 1px solid #eee;
+            display: flex; align-items: center; gap: 10px; font-weight: 500;
+        }
+        .routine-emoji { font-size: 1.4rem; min-width: 30px; text-align: center; }
+
+        .food-img-display { width: 100%; max-height: 300px; object-fit: contain; border-radius: 15px; margin: 10px 0; display: none; border: 2px solid var(--primary); }
+        .stanley-container { display: flex; align-items: center; justify-content: space-between; }
+        .stanley-img { width: 80px; height: auto; transform: rotate(-10deg); }
+        .counter-box { font-size: 3rem; font-weight: 900; color: var(--secondary); text-shadow: 2px 2px 0 #fff; }
+        .watch-btn { background-color: #fdfdfd; color: #333; border: 2px solid #eee; text-align: left; padding-left: 15px; margin-bottom: 8px; box-shadow: 2px 2px 0 #ddd;}
+        .mini-card { font-size: 0.9rem; background: rgba(255, 255, 255, 0.8); display: flex; justify-content: space-between; align-items: center; padding: 15px; color: #888;}
+        .food-type-btn { font-size: 0.85rem; padding: 10px 5px; transition: opacity 0.2s, transform 0.2s; }
+
+        #loader { text-align: center; padding: 50px; font-weight:bold; color: #ff85a2; background: white; border-radius: 20px;}
+    </style>
+</head>
+<body>
+
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted) {wishlistSubmitDone();}"></iframe>
+    
+    <div id="emoji-container"></div>
+
+    <div class="container">
+        <div class="card" style="text-align: center;">
+            <h1 style="margin:0; font-size: 2.2rem;">Hello Doly! 🥹💖</h1>
+            <p style="margin:5px 0 0 0; font-size:1rem; color:#ff85a2; font-weight:bold;">ace loves you 💞</p>
+        </div>
+
+        <div id="loader">Loading... 💖</div>
+
+        <div id="content" style="display: none; flex-direction: column; gap: 15px;">
+
+            <div class="card">
+                <h2>🛍️ Wishlist</h2>
+                <div id="wishlist-container"></div>
+                <form id="google-wish-form" action="" method="POST" target="hidden_iframe" class="wishlist-add-box" onsubmit="submitted=true;">
+                    <input type="text" id="wish-entry" name="" placeholder="Add new item..." required />
+                    <button class="btn" type="submit">Add</button>
+                </form>
+                <div id="wish-success-msg" style="display:none; text-align:center; color: #2ed573; font-weight:bold; font-size:0.9rem; margin-top:5px;">Added! ✨</div>
+            </div>
+
+            <div class="card">
+                <h2>✨ Bugün Yapılacaklar</h2>
+                <div id="routine-list" class="routine-list"></div>
+            </div>
+
+            <div class="card" style="background: #eef9ff; border-color: #a3d8f4;">
+                <div class="stanley-container">
+                    <div>
+                        <h2 style="color: #4da6d1; margin-bottom:0;">Stanley Sips</h2>
+                        <div class="counter-box" id="water-count">0</div>
+                    </div>
+                    <img id="stanley-img-tag" src="" class="stanley-img" />
+                </div>
+                <button class="btn" style="background: #a3d8f4;" onclick="addWater()">+ Drink Water</button>
+            </div>
+
+            <div class="card" style="border-color: #ff85a2;">
+                <h2>🫡 Ace'e Görev Ver</h2>
+                <form id="taskForm" action="" method="POST">
+                    <label style="font-size:0.9rem; font-weight:bold;">Görev Tipi:</label>
+                    <select id="task-type" name="TaskType" onchange="updatePlaceholder()">
+                        <option value="Yemek Söyle">🍔 Yemek Söyle</option>
+                        <option value="Limit Arttır">💸 Limit Arttır</option>
+                        <option value="Para At">🤑 Para At OC</option>
+                        <option value="Essay Yaz">📝 Essay Yaz</option>
+                    </select>
+                    <textarea id="task-details" name="Details" rows="3" placeholder="Detay yaz..."></textarea>
+                    <button class="btn" type="submit">Gönder 🚀</button>
+                </form>
+            </div>
+
+            <div class="card" style="text-align: center;">
+                <h2>🍔 I'm Hungry</h2>
+                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                    <button class="btn food-type-btn" id="btn-healthy" onclick="setFoodType('Healthy')" style="background: #4CAF50; flex: 1; margin-top: 0;">🥗 Sağlıklı</button>
+                    <button class="btn food-type-btn" id="btn-dirty" onclick="setFoodType('Dirty')" style="background: #e74c3c; flex: 1; margin-top: 0;">🍕 Pis</button>
+                    <button class="btn food-type-btn" id="btn-both" onclick="setFoodType('All')" style="background: #9b59b6; flex: 1; margin-top: 0;">🍽️ Hepsi</button>
+                </div>
+                <div id="food-result" style="font-size: 1.2rem; min-height: 30px;">Don't know what to eat?</div>
+                <img id="food-img-tag" class="food-img-display" src="" />
+                <button class="btn" onclick="pickFood()">🎲 Pick Random</button>
+                <a id="food-link-btn" href="#" target="_blank" class="btn" style="display:none; background:#4CAF50;">Order Now 🛵</a>
+            </div>
+
+            <div class="card">
+                <h2>💌 Ace'e Mesaj</h2>
+                <form id="msgForm" action="" method="POST">
+                    <textarea name="Message" rows="3" placeholder="ily"></textarea>
+                    <button class="btn" style="background-color: #a3d8f4; margin-top:5px;" type="submit">Gönder 📨</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>📺 Watch List</h2>
+                <div id="watchlist-container"></div>
+            </div>
+
+            <div class="card">
+                <h2>🎭 Fun</h2>
+                <div id="meme-result" style="margin: 10px 0;">Tap for fun</div>
+                <button class="btn" onclick="pickMeme(); makeItRain('✨');" style="background: #FFD700; color: #555;">✨ Surprise Me</button>
+            </div>
+
+            <div class="card mini-card">
+                <span>🌸 Cycle Tracker</span>
+                <span id="period-countdown">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // *** ⚙️ LINKS ***
+        const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQuJsb75m10YnQtHuHKl-gNKKGfJNPh4OYr7SpSNuljJat5wdgHfUPjFA3CYHoPAfwk2f3rgHzBTTOD/pub?gid=0&single=true&output=csv";
+        const formspreeURL = "https://formspree.io/f/mlggnvbn"; 
+        const stanleyImage = "https://i.ibb.co/dJs3KJNn/image-removebg-preview-8.png";
+        const googleFormURL = "https://docs.google.com/forms/d/e/1FAIpQLSf4MWX33nGvVVLIbxH7KNwPFBVLQ6C6svd_gdCIBvwexsxLXw/formResponse"; 
+        const googleFormEntryID = "entry.546692272"; 
+        // ---------------------------------------------------------
+
+        // Configure Forms
+        document.getElementById('taskForm').action = formspreeURL;
+        document.getElementById('msgForm').action = formspreeURL;
+        document.getElementById('stanley-img-tag').src = stanleyImage;
+        const gForm = document.getElementById('google-wish-form');
+        gForm.action = googleFormURL;
+        document.getElementById('wish-entry').name = googleFormEntryID;
+
+        // Variables
+        let foods = []; let memes = []; let watchlist = []; let wishlist = []; let nextPeriodDate = "";
+        let selectedFoodType = "All";
+        var submitted = false; 
+
+        // --- CSV PARSER ---
+        function parseCSV(text) {
+            const rows = [];
+            let currentRow = [];
+            let currentVal = '';
+            let insideQuote = false;
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (char === '"') { insideQuote = !insideQuote; } 
+                else if (char === ',' && !insideQuote) { currentRow.push(currentVal.trim()); currentVal = ''; } 
+                else if ((char === '\n' || char === '\r') && !insideQuote) {
+                    if (currentVal || currentRow.length > 0) currentRow.push(currentVal.trim());
+                    if (currentRow.length > 0) rows.push(currentRow);
+                    currentRow = []; currentVal = '';
+                } else { currentVal += char; }
+            }
+            if (currentRow.length > 0) rows.push(currentRow);
+            return rows;
+        }
+
+        async function fetchData() {
+            try {
+                const response = await fetch(sheetURL);
+                const data = await response.text();
+                const rows = parseCSV(data); 
+
+                wishlist = [];
+                foods = []; 
+
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (row.length < 2) continue; 
+                    
+                    if (row[0] && row[0] !== "Rest_Name") {
+                        foods.push({ name: row[0], link: row[1] || "", img: row[2] || "", type: (row[3] || "Both").trim() });
+                    }
+                    if (row[4]) memes.push(row[4]);
+                    if (row[5] && row[5].toLowerCase() !== "watch_title") {
+                        watchlist.push({ title: row[5], link: row[6] || "#" });
+                    }
+
+                    // --- DATE FIX: LOOK AT ROW 3 (INDEX 2) ---
+                    // Changed from i===1 to i===2 based on user request (H3)
+                    if (i === 2 && row[7]) nextPeriodDate = row[7];
+
+                    if (row[8] && row[8].length > 1 && row[8].toLowerCase() !== "wishlist_item" && row[8].toLowerCase() !== "item") {
+                        wishlist.push(row[8]);
+                    }
+                }
+
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('content').style.display = 'flex';
+                updatePeriodCountdown(); renderWatchlist(); renderWishlist(); renderRoutine();
+            } catch (error) { 
+                console.error(error); 
+                document.getElementById('loader').innerText = "Error loading data.";
+            }
+        }
+
+        function renderWishlist() {
+            const container = document.getElementById('wishlist-container');
+            if (wishlist.length === 0) { container.innerHTML = "<p>Wishlist boş!</p>"; return; }
+            container.innerHTML = "";
+            wishlist.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'wishlist-item';
+                div.innerHTML = `<div class="rank-num">${index + 1}</div><span>${item}</span>`;
+                container.appendChild(div);
+            });
+        }
+        
+        function wishlistSubmitDone() {
+            const input = document.getElementById('wish-entry');
+            const newItem = input.value;
+            if (newItem) { wishlist.push(newItem); renderWishlist(); }
+            input.value = "";
+            const msg = document.getElementById('wish-success-msg');
+            msg.style.display = "block";
+            makeItRain('🛍️'); 
+            setTimeout(() => { msg.style.display = "none"; }, 3000);
+        }
+
+        function updatePlaceholder() {
+            const type = document.getElementById('task-type').value;
+            const input = document.getElementById('task-details');
+            const texts = {
+                "Yemek Söyle": "Ne yiceksin? (Burger, Sushi...)",
+                "Limit Arttır": "Ne kadar arttırayım? (💸)",
+                "Para At": "Ne kadar atim?",
+                "Essay Yaz": "Konu ne? Ne zamana?"
+            };
+            input.placeholder = texts[type] || "Detay yaz...";
+        }
+
+        function renderRoutine() {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayName = days[new Date().getDay()];
+            
+            const emojiMap = {
+                'Glutatyon': '💊', 'Glikolik asit': '🧪', 'Retinol': '🌙', 'Pirinc suyu': '🌾',
+                'Yuz maskesi + Glikolik asit': '🎭', 'Serbest cilt bakimi': '🧖‍♀️', 'SPF': '☀️',
+                'Yemek ye': '🥗', 'Su iç': '💧', "Ace'e foto at": '📸'
+            };
+            const routineMap = {
+                'Monday': ['Glutatyon', 'Glikolik asit'], 'Tuesday': ['Glutatyon', 'Retinol'], 'Wednesday': ['Glutatyon', 'Pirinc suyu'],
+                'Thursday': ['Glutatyon', 'Retinol'], 'Friday': ['Glutatyon', 'Yuz maskesi + Glikolik asit'], 'Saturday': ['Glutatyon', 'Serbest cilt bakimi'], 'Sunday': ['Glutatyon', 'Retinol']
+            };
+
+            let dailyTasks = routineMap[dayName] || ['SPF'];
+            dailyTasks = dailyTasks.concat(['Yemek ye', 'Su iç', "Ace'e foto at"]);
+
+            const container = document.getElementById('routine-list');
+            container.innerHTML = "";
+            dailyTasks.forEach(item => {
+                const icon = emojiMap[item] || '✨';
+                const div = document.createElement('div');
+                div.className = 'routine-item';
+                div.innerHTML = `<span class="routine-emoji">${icon}</span> <span>${item}</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        function makeItRain(emoji) {
+            const container = document.getElementById('emoji-container');
+            for(let i=0; i<10; i++) {
+                const el = document.createElement('div');
+                el.innerText = emoji;
+                el.className = 'floating-emoji';
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.top = (Math.random() * 20 + 80) + 'vh'; 
+                el.style.animationDuration = (Math.random() * 1 + 1.5) + 's';
+                container.appendChild(el);
+                setTimeout(() => el.remove(), 2000);
+            }
+        }
+
+        function setFoodType(type) {
+            selectedFoodType = type;
+            // Update button styles
+            document.querySelectorAll('.food-type-btn').forEach(btn => {
+                btn.style.opacity = '0.5';
+                btn.style.transform = 'scale(0.95)';
+            });
+            const activeBtn = type === 'Healthy' ? 'btn-healthy' : type === 'Dirty' ? 'btn-dirty' : 'btn-both';
+            document.getElementById(activeBtn).style.opacity = '1';
+            document.getElementById(activeBtn).style.transform = 'scale(1)';
+            // Reset display
+            document.getElementById('food-result').innerHTML = type === 'All' ? "Hepsinden seç!" : type === 'Healthy' ? "Sağlıklı yemek seç!" : "Pis yemek seç!";
+            document.getElementById('food-img-tag').style.display = 'none';
+            document.getElementById('food-link-btn').style.display = 'none';
+        }
+
+        function pickFood() {
+            if (foods.length === 0) return;
+            let filtered = foods;
+            if (selectedFoodType === 'Healthy') {
+                filtered = foods.filter(f => f.type === 'Healthy' || f.type === 'Both');
+            } else if (selectedFoodType === 'Dirty') {
+                filtered = foods.filter(f => f.type === 'Dirty' || f.type === 'Both');
+            }
+            if (filtered.length === 0) { document.getElementById('food-result').innerHTML = "Bu kategoride yemek yok!"; return; }
+            const random = filtered[Math.floor(Math.random() * filtered.length)];
+            document.getElementById('food-result').innerHTML = `Go eat: <b>${random.name}</b>`;
+            document.getElementById('food-result').style.color = "#ff85a2";
+            const imgTag = document.getElementById('food-img-tag');
+            if (random.img && random.img.length > 5) { imgTag.src = random.img; imgTag.style.display = 'block'; } else { imgTag.style.display = 'none'; }
+            const linkBtn = document.getElementById('food-link-btn');
+            if (random.link && random.link.startsWith('http')) { linkBtn.style.display = 'inline-block'; linkBtn.href = random.link; } else { linkBtn.style.display = 'none'; }
+        }
+
+        function pickMeme() {
+            if (memes.length === 0) return;
+            const random = memes[Math.floor(Math.random() * memes.length)];
+            const div = document.getElementById('meme-result');
+            if (random.startsWith('http')) div.innerHTML = `<img src="${random}" style="max-width:100%; border-radius:10px;">`; else div.innerText = random;
+        }
+
+        function renderWatchlist() {
+            const container = document.getElementById('watchlist-container');
+            if (watchlist.length === 0) { container.innerHTML = "<p>Nothing to watch yet!</p>"; return; }
+            watchlist.forEach(show => {
+                const a = document.createElement('a');
+                a.href = show.link; a.target = "_blank"; a.style.textDecoration = "none";
+                a.innerHTML = `<button class="btn watch-btn">🎬 ${show.title}</button>`;
+                container.appendChild(a);
+            });
+        }
+
+        function checkWaterDate() {
+            const todayStr = new Date().toDateString();
+            if (localStorage.getItem('lastSipDate') !== todayStr) { localStorage.setItem('waterCount', 0); localStorage.setItem('lastSipDate', todayStr); }
+            document.getElementById('water-count').innerText = localStorage.getItem('waterCount') || 0;
+        }
+        function addWater() {
+            let count = parseInt(localStorage.getItem('waterCount') || 0);
+            localStorage.setItem('waterCount', ++count); localStorage.setItem('lastSipDate', new Date().toDateString());
+            document.getElementById('water-count').innerText = count;
+        }
+
+        // --- CYCLE TRACKER: ROBUST PARSER ---
+        function updatePeriodCountdown() {
+            const el = document.getElementById('period-countdown');
+            if (!nextPeriodDate || nextPeriodDate.length < 5) { el.innerHTML = "<strong>Update Date</strong>"; return; }
+            
+            // Handle multiple formats: 2026-01-31, 31.01.2026, 31/01/2026
+            let target;
+            
+            // Try Standard YYYY-MM-DD
+            if (nextPeriodDate.includes('-')) {
+                const parts = nextPeriodDate.split('-');
+                if(parts.length === 3) target = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            } 
+            // Try European DD.MM.YYYY or DD/MM/YYYY
+            else if (nextPeriodDate.includes('.') || nextPeriodDate.includes('/')) {
+                const sep = nextPeriodDate.includes('.') ? '.' : '/';
+                const parts = nextPeriodDate.split(sep);
+                if(parts.length === 3) target = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+            }
+
+            if (!target || isNaN(target.getTime())) {
+                // Fallback to simple parse if custom fails
+                target = new Date(nextPeriodDate);
+            }
+
+            if (isNaN(target.getTime())) {
+                el.innerHTML = "<strong>Invalid Date</strong>";
+                console.log("Failed:", nextPeriodDate);
+                return;
+            }
+
+            const daysLeft = Math.ceil((target - new Date()) / (1000 * 60 * 60 * 24));
+            el.innerHTML = daysLeft < 0 ? "<strong>Late / Started</strong>" : `<strong>${daysLeft} days</strong> left`;
+        }
+
+        checkWaterDate();
+        fetchData();
+        updatePlaceholder();
+    </script>
+</body>
+</html>
