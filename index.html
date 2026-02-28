@@ -85,7 +85,7 @@
 
         /* --- ✨ COMPLETED WISHLIST STYLES --- */
         .completed-list {
-            max-height: 120px; 
+            max-height: 260px; /* Increased from 120px to fit ~5 items */
             overflow-y: auto;
             border-radius: 12px;
             padding-right: 5px;
@@ -328,13 +328,16 @@
             if (completedWishlist.length > 0) {
                 const header = document.createElement('div');
                 header.className = 'completed-header';
-                header.innerText = "🎁 Already Spoiled With";
+                header.innerText = "💅 Spoiled Princess Things";
                 container.appendChild(header);
 
                 const completedContainer = document.createElement('div');
                 completedContainer.className = 'completed-list';
 
-                completedWishlist.forEach((item) => {
+                // We reverse the array here so the newest completions sit at the top!
+                const reversedCompleted = [...completedWishlist].reverse();
+
+                reversedCompleted.forEach((item) => {
                     const div = document.createElement('div');
                     div.className = 'wishlist-item completed-item';
                     div.innerHTML = `<span>${item}</span>`;
