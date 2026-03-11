@@ -1,377 +1,511 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Çin Odası Deneyi — Sunum</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doly.fun 🎀</title>
+    <style>
+        :root {
+            --primary: #ff85a2; 
+            --secondary: #a3d8f4;
+            --text: #4a4a4a;
+            --font: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+        }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* --- ✨ FUN ANIMATIONS --- */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+        }
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
 
-  :root {
-    --bg: #0f0f1a;
-    --surface: #1a1a2e;
-    --accent: #e94560;
-    --accent2: #0f3460;
-    --text: #eaeaea;
-    --muted: #8888aa;
-    --highlight: #16213e;
-  }
+        body { 
+            background: linear-gradient(-45deg, #ffe6f2, #fff0f5, #e6e6fa, #ffe6f2);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text); 
+            font-family: var(--font); 
+            margin: 0; padding: 20px; 
+            display: flex; justify-content: center; 
+            overflow-x: hidden;
+        }
 
-  body {
-    font-family: 'Inter', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    overflow: hidden;
-    height: 100vh;
-  }
+        .container { max-width: 500px; width: 100%; display: flex; flex-direction: column; gap: 15px; position: relative; }
 
-  .slide {
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    padding: 4rem 8rem;
-    text-align: center;
-    animation: fadeIn 0.4s ease;
-  }
+        .card { 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 25px; padding: 20px; 
+            box-shadow: 0 8px 32px 0 rgba(255, 133, 162, 0.2); 
+            border: 2px solid #fff;
+            backdrop-filter: blur(4px);
+            transition: transform 0.2s;
+        }
+        
+        h2 { margin-top: 0; color: var(--primary); font-size: 1.3rem; margin-bottom: 10px;}
+        
+        .btn { 
+            background: var(--primary); color: white; border: none; padding: 12px; border-radius: 15px; 
+            font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; 
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1); text-decoration: none; display: inline-block; text-align: center;
+            transition: transform 0.1s;
+        }
+        .btn:hover { animation: wiggle 0.3s ease-in-out infinite; }
+        .btn:active { transform: scale(0.95) !important; animation: none; }
 
-  .slide.active { display: flex; }
+        #emoji-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
+        .floating-emoji { position: absolute; font-size: 2rem; animation: floatUp 2s ease-out forwards; }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+        input, select, textarea {
+            width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px;
+            border: 2px solid #eee; font-family: inherit; box-sizing: border-box; resize: vertical;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; }
+        
+        .wishlist-item { 
+            display: flex; align-items: center; 
+            background: #fffbfd; padding: 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #eee;
+        }
+        .rank-num {
+            background: var(--primary); color: white; width: 25px; height: 25px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: bold; margin-right: 10px; flex-shrink: 0;
+        }
 
-  h1 { font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.2; }
-  h2 { font-size: 2.2rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--accent); }
-  h3 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: var(--accent); }
+        .wishlist-add-box { display: flex; gap: 5px; margin-top: 10px; }
+        .wishlist-add-box input { margin-bottom: 0; }
+        .wishlist-add-box button { margin-top: 0; width: auto; padding: 0 20px; }
 
-  p, li {
-    font-size: 1.35rem;
-    line-height: 1.7;
-    font-weight: 300;
-    max-width: 900px;
-  }
+        /* --- ✨ COMPLETED WISHLIST STYLES --- */
+        .completed-list {
+            max-height: 260px; /* Increased from 120px to fit ~5 items */
+            overflow-y: auto;
+            border-radius: 12px;
+            padding-right: 5px;
+            margin-top: 10px;
+        }
+        .completed-list::-webkit-scrollbar { width: 6px; }
+        .completed-list::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
 
-  ul { list-style: none; text-align: left; }
-  ul li { padding: 0.4rem 0; }
-  ul li::before { content: "→ "; color: var(--accent); font-weight: 600; }
+        .completed-item {
+            opacity: 0.6;
+            text-decoration: line-through;
+            background: #f5f5f5;
+            border: 1px dashed #ccc;
+        }
+        
+        .completed-header {
+            font-size: 1.2rem;
+            color: #888;
+            text-align: left;
+            margin: 15px 0 5px 0;
+            font-weight: bold;
+        }
 
-  .emoji-art {
-    font-size: 4rem;
-    margin: 1rem 0;
-    letter-spacing: 0.3rem;
-  }
+        .routine-list { display: flex; flex-direction: column; gap: 8px; }
+        .routine-item { 
+            background: #fff; padding: 10px 15px; border-radius: 12px; border: 1px solid #eee;
+            display: flex; align-items: center; gap: 10px; font-weight: 500;
+        }
+        .routine-emoji { font-size: 1.4rem; min-width: 30px; text-align: center; }
 
-  .subtitle {
-    font-size: 1.3rem;
-    color: var(--muted);
-    margin-top: 0.5rem;
-  }
+        .food-img-display { width: 100%; max-height: 300px; object-fit: contain; border-radius: 15px; margin: 10px 0; display: none; border: 2px solid var(--primary); }
+        .stanley-container { display: flex; align-items: center; justify-content: space-between; }
+        .stanley-img { width: 80px; height: auto; transform: rotate(-10deg); }
+        .counter-box { font-size: 3rem; font-weight: 900; color: var(--secondary); text-shadow: 2px 2px 0 #fff; }
+        .watch-btn { background-color: #fdfdfd; color: #333; border: 2px solid #eee; text-align: left; padding-left: 15px; margin-bottom: 8px; box-shadow: 2px 2px 0 #ddd;}
+        .mini-card { font-size: 0.9rem; background: rgba(255, 255, 255, 0.8); display: flex; justify-content: space-between; align-items: center; padding: 15px; color: #888;}
+        .food-type-btn { font-size: 0.85rem; padding: 10px 5px; transition: opacity 0.2s, transform 0.2s; }
 
-  .quote {
-    border-left: 4px solid var(--accent);
-    padding: 1rem 2rem;
-    margin: 1.5rem 0;
-    font-style: italic;
-    font-size: 1.4rem;
-    background: var(--highlight);
-    border-radius: 0 8px 8px 0;
-    max-width: 800px;
-    text-align: left;
-  }
-
-  .card-row {
-    display: flex;
-    gap: 2rem;
-    margin-top: 1.5rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid #2a2a4a;
-    border-radius: 12px;
-    padding: 1.5rem 2rem;
-    max-width: 280px;
-    text-align: left;
-  }
-
-  .card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
-  .card p { font-size: 1rem; }
-
-  .step-list {
-    text-align: left;
-    max-width: 750px;
-  }
-
-  .step-list li {
-    padding: 0.6rem 0;
-    font-size: 1.3rem;
-  }
-
-  .step-list li strong { color: var(--accent); }
-
-  .nav {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    display: flex;
-    gap: 0.5rem;
-    z-index: 100;
-  }
-
-  .nav button {
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid #2a2a4a;
-    border-radius: 8px;
-    padding: 0.6rem 1.2rem;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-
-  .nav button:hover { background: var(--accent2); }
-
-  .progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 3px;
-    background: var(--accent);
-    transition: width 0.3s ease;
-    z-index: 100;
-  }
-
-  .slide-num {
-    position: fixed;
-    bottom: 2rem;
-    left: 2rem;
-    color: var(--muted);
-    font-size: 0.9rem;
-  }
-
-  .ref-list { text-align: left; max-width: 800px; }
-  .ref-list li { font-size: 1.05rem; padding: 0.5rem 0; color: var(--muted); }
-  .ref-list li::before { content: "📄 "; }
-
-  .tag {
-    display: inline-block;
-    background: var(--accent);
-    color: white;
-    padding: 0.2rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin: 0.2rem;
-  }
-</style>
+        #loader { text-align: center; padding: 50px; font-weight:bold; color: #ff85a2; background: white; border-radius: 20px;}
+    </style>
 </head>
 <body>
 
-<div class="progress" id="progress"></div>
-<div class="slide-num" id="slideNum"></div>
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted) {wishlistSubmitDone();}"></iframe>
+    
+    <div id="emoji-container"></div>
 
-<!-- Slide 1: Title -->
-<div class="slide active" id="s1">
-  <div class="emoji-art">🧠 📦 🇨🇳 ❓</div>
-  <h1>Çin Odası Deneyi</h1>
-  <p class="subtitle">Makineler Gerçekten Düşünebilir mi?</p>
-  <p class="subtitle" style="margin-top: 2rem; font-size: 1rem; color: #666;">
-    <span class="tag">Zihin Felsefesi</span>
-    <span class="tag">Yapay Zeka</span>
-    <span class="tag">Bilinç</span>
-  </p>
-</div>
+    <div class="container">
+        <div class="card" style="text-align: center;">
+            <h1 style="margin:0; font-size: 2.2rem;">Hello Doly! 🥹💖</h1>
+            <p style="margin:5px 0 0 0; font-size:1rem; color:#ff85a2; font-weight:bold;">ace loves you 💞</p>
+        </div>
 
-<!-- Slide 2: Hook -->
-<div class="slide" id="s2">
-  <div class="emoji-art">💬 🤖</div>
-  <h2>Bir Soru</h2>
-  <p>ChatGPT size mükemmel bir cevap verdiğinde...<br><br>
-  gerçekten <strong style="color: var(--accent);">anlıyor</strong> mu?<br><br>
-  yoksa sadece çok iyi bir <strong style="color: var(--accent);">taklit</strong> mi yapıyor?</p>
-</div>
+        <div id="loader">Loading... 💖</div>
 
-<!-- Slide 3: Searle -->
-<div class="slide" id="s3">
-  <div class="emoji-art">👤</div>
-  <h2>John Searle (1932–)</h2>
-  <ul>
-    <li>Berkeley Üniversitesi, Felsefe Profesörü</li>
-    <li>Zihin felsefesi ve dil felsefesi uzmanı</li>
-    <li>1980 — "Minds, Brains, and Programs" makalesi</li>
-    <li>"Güçlü Yapay Zeka" tezine karşı çıkış</li>
-  </ul>
-</div>
+        <div id="content" style="display: none; flex-direction: column; gap: 15px;">
 
-<!-- Slide 4: The Experiment -->
-<div class="slide" id="s4">
-  <h2>Çin Odası Deneyi</h2>
-  <div style="font-size: 2.5rem; margin: 1rem 0; letter-spacing: 0.5rem;">
-    📝🇨🇳 → 🚪 → 👤📖 → 🚪 → 📝🇨🇳
-  </div>
-  <ul class="step-list">
-    <li><strong>1.</strong> Bir odadasınız, hiç Çince bilmiyorsunuz</li>
-    <li><strong>2.</strong> Elinizde detaylı bir kural kitabı var</li>
-    <li><strong>3.</strong> Dışarıdan Çince sorular geliyor</li>
-    <li><strong>4.</strong> Kitaba bakıp doğru sembolleri yazıyorsunuz</li>
-    <li><strong>5.</strong> Dışarıdakiler: "Mükemmel Çince konuşuyor!"</li>
-  </ul>
-  <p style="margin-top: 1.5rem; color: var(--accent); font-weight: 600; font-size: 1.4rem;">
-    Ama siz Çince anlamıyorsunuz. ❌
-  </p>
-</div>
+            <div class="card">
+                <h2>🛍️ Wishlist</h2>
+                <div id="wishlist-container"></div>
+                <form id="google-wish-form" action="" method="POST" target="hidden_iframe" class="wishlist-add-box" onsubmit="submitted=true;">
+                    <input type="text" id="wish-entry" name="" placeholder="Add new item..." required />
+                    <button class="btn" type="submit">Add</button>
+                </form>
+                <div id="wish-success-msg" style="display:none; text-align:center; color: #2ed573; font-weight:bold; font-size:0.9rem; margin-top:5px;">Added! ✨</div>
+            </div>
 
-<!-- Slide 5: Quote -->
-<div class="slide" id="s5">
-  <div class="emoji-art">💡</div>
-  <div class="quote">
-    "Whatever purely formal principles you put into the computer, they will not be sufficient for understanding, since a human will be able to follow the formal principles without understanding anything."
-  </div>
-  <p class="subtitle">— John Searle, 1980</p>
-</div>
+            <div class="card">
+                <h2>✨ Bugün Yapılacaklar</h2>
+                <div id="routine-list" class="routine-list"></div>
+            </div>
 
-<!-- Slide 6: The Argument -->
-<div class="slide" id="s6">
-  <h2>Searle'ün Argümanı</h2>
-  <div class="card-row">
-    <div class="card">
-      <h3>1️⃣ Sentaks</h3>
-      <p>Programlar tamamen sözdizimseldir — sembollerle çalışır.</p>
+            <div class="card" style="background: #eef9ff; border-color: #a3d8f4;">
+                <div class="stanley-container">
+                    <div>
+                        <h2 style="color: #4da6d1; margin-bottom:0;">Stanley Sips</h2>
+                        <div class="counter-box" id="water-count">0</div>
+                    </div>
+                    <img id="stanley-img-tag" src="" class="stanley-img" />
+                </div>
+                <button class="btn" style="background: #a3d8f4;" onclick="addWater()">+ Drink Water</button>
+            </div>
+
+            <div class="card" style="border-color: #ff85a2;">
+                <h2>🫡 Ace'e Görev Ver</h2>
+                <form id="taskForm" action="" method="POST">
+                    <label style="font-size:0.9rem; font-weight:bold;">Görev Tipi:</label>
+                    <select id="task-type" name="TaskType" onchange="updatePlaceholder()">
+                        <option value="Yemek Söyle">🍔 Yemek Söyle</option>
+                        <option value="Limit Arttır">💸 Limit Arttır</option>
+                        <option value="Para At">🤑 Para At OC</option>
+                        <option value="Essay Yaz">📝 Essay Yaz</option>
+                    </select>
+                    <textarea id="task-details" name="Details" rows="3" placeholder="Detay yaz..."></textarea>
+                    <button class="btn" type="submit">Gönder 🚀</button>
+                </form>
+            </div>
+
+            <div class="card" style="text-align: center;">
+                <h2>🍔 I'm Hungry</h2>
+                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                    <button class="btn food-type-btn" id="btn-healthy" onclick="setFoodType('Healthy')" style="background: #4CAF50; flex: 1; margin-top: 0;">🥗 Sağlıklı</button>
+                    <button class="btn food-type-btn" id="btn-dirty" onclick="setFoodType('Dirty')" style="background: #e74c3c; flex: 1; margin-top: 0;">🍕 Pis</button>
+                    <button class="btn food-type-btn" id="btn-both" onclick="setFoodType('All')" style="background: #9b59b6; flex: 1; margin-top: 0;">🍽️ Hepsi</button>
+                </div>
+                <div id="food-result" style="font-size: 1.2rem; min-height: 30px;">Don't know what to eat?</div>
+                <img id="food-img-tag" class="food-img-display" src="" />
+                <button class="btn" onclick="pickFood()">🎲 Pick Random</button>
+                <a id="food-link-btn" href="#" target="_blank" class="btn" style="display:none; background:#4CAF50;">Order Now 🛵</a>
+            </div>
+
+            <div class="card">
+                <h2>💌 Ace'e Mesaj</h2>
+                <form id="msgForm" action="" method="POST">
+                    <textarea name="Message" rows="3" placeholder="ily"></textarea>
+                    <button class="btn" style="background-color: #a3d8f4; margin-top:5px;" type="submit">Gönder 📨</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>📺 Watch List</h2>
+                <div id="watchlist-container"></div>
+            </div>
+
+            <div class="card">
+                <h2>🎭 Fun</h2>
+                <div id="meme-result" style="margin: 10px 0;">Tap for fun</div>
+                <button class="btn" onclick="pickMeme(); makeItRain('✨');" style="background: #FFD700; color: #555;">✨ Surprise Me</button>
+            </div>
+
+            <div class="card mini-card">
+                <span>🌸 Cycle Tracker</span>
+                <span id="period-countdown">Loading...</span>
+            </div>
+        </div>
     </div>
-    <div class="card">
-      <h3>2️⃣ Semantik</h3>
-      <p>İnsan zihni anlamlarla çalışır — semantiktir.</p>
-    </div>
-    <div class="card">
-      <h3>3️⃣ Sonuç</h3>
-      <p>Sentaks tek başına semantiği oluşturamaz.</p>
-    </div>
-  </div>
-  <p style="margin-top: 2rem; font-size: 1.2rem;">
-    ∴ Programlar <strong style="color: var(--accent);">gerçekten düşünemez</strong>
-  </p>
-</div>
 
-<!-- Slide 7: Analogy -->
-<div class="slide" id="s7">
-  <div class="emoji-art">🌧️ 💻</div>
-  <h2>Simülasyon ≠ Gerçeklik</h2>
-  <p style="font-size: 1.5rem;">
-    Hava durumu simülasyonu sizi <strong style="color: var(--accent);">ıslatmaz</strong>.<br><br>
-    Düşünce simülasyonu da gerçek <strong style="color: var(--accent);">düşünce</strong> değildir.
-  </p>
-</div>
+    <script>
+        // *** ⚙️ LINKS ***
+        const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQuJsb75m10YnQtHuHKl-gNKKGfJNPh4OYr7SpSNuljJat5wdgHfUPjFA3CYHoPAfwk2f3rgHzBTTOD/pub?gid=0&single=true&output=csv";
+        const formspreeURL = "https://formspree.io/f/mlggnvbn"; 
+        const stanleyImage = "https://i.ibb.co/dJs3KJNn/image-removebg-preview-8.png";
+        const googleFormURL = "https://docs.google.com/forms/d/e/1FAIpQLSf4MWX33nGvVVLIbxH7KNwPFBVLQ6C6svd_gdCIBvwexsxLXw/formResponse"; 
+        const googleFormEntryID = "entry.546692272"; 
+        // ---------------------------------------------------------
 
-<!-- Slide 8: Counterarguments -->
-<div class="slide" id="s8">
-  <h2>Karşı Argümanlar</h2>
-  <div class="card-row">
-    <div class="card">
-      <h3>🔄 Sistem Yanıtı</h3>
-      <p>"Kişi değil, sistemin bütünü anlıyor."<br><br>
-      <em style="color: var(--muted);">Searle: Kitabı ezberlesem de anlamıyorum.</em></p>
-    </div>
-    <div class="card">
-      <h3>🤖 Robot Yanıtı</h3>
-      <p>"Fiziksel dünyayla etkileşim gerekli."<br><br>
-      <em style="color: var(--muted);">Searle: İçeride hâlâ sembol işleme.</em></p>
-    </div>
-    <div class="card">
-      <h3>🧬 Beyin Simülatörü</h3>
-      <p>"Nöronları birebir simüle etsek?"<br><br>
-      <em style="color: var(--muted);">Searle: Borulardan bilinç çıkmaz.</em></p>
-    </div>
-  </div>
-</div>
+        // Configure Forms
+        document.getElementById('taskForm').action = formspreeURL;
+        document.getElementById('msgForm').action = formspreeURL;
+        document.getElementById('stanley-img-tag').src = stanleyImage;
+        const gForm = document.getElementById('google-wish-form');
+        gForm.action = googleFormURL;
+        document.getElementById('wish-entry').name = googleFormEntryID;
 
-<!-- Slide 9: Today -->
-<div class="slide" id="s9">
-  <div class="emoji-art">🤖 🔮</div>
-  <h2>Yapay Zeka Çağında</h2>
-  <p>ChatGPT, Gemini, Claude...</p>
-  <p style="margin-top: 1rem;">Milyarlarca metin üzerinde eğitilmiş,<br>
-  bir sonraki kelimeyi tahmin eden sistemler.</p>
-  <p style="margin-top: 1.5rem; font-size: 1.5rem; font-weight: 600;">
-    Çok büyük, çok karmaşık bir<br>
-    <span style="color: var(--accent);">Çin Odası</span> mı?
-  </p>
-  <p style="margin-top: 1rem; color: var(--muted);">
-    Yoksa yeterli karmaşıklık → anlama mı? (emergence)
-  </p>
-</div>
+        // Variables
+        let foods = []; let memes = []; let watchlist = []; let wishlist = []; let completedWishlist = []; let nextPeriodDate = "";
+        let selectedFoodType = "All";
+        var submitted = false; 
 
-<!-- Slide 10: Key Question -->
-<div class="slide" id="s10">
-  <div class="emoji-art">🤔</div>
-  <h2>Asıl Soru</h2>
-  <p style="font-size: 1.6rem;">
-    "Yapay zeka düşünebilir mi?" kadar<br><br>
-    <strong style="color: var(--accent); font-size: 1.8rem;">"Düşünmek ne demek?"</strong><br><br>
-    sorusunu da sormamız gerekiyor.
-  </p>
-</div>
+        // --- CSV PARSER ---
+        function parseCSV(text) {
+            const rows = [];
+            let currentRow = [];
+            let currentVal = '';
+            let insideQuote = false;
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (char === '"') { insideQuote = !insideQuote; } 
+                else if (char === ',' && !insideQuote) { currentRow.push(currentVal.trim()); currentVal = ''; } 
+                else if ((char === '\n' || char === '\r') && !insideQuote) {
+                    if (currentVal || currentRow.length > 0) currentRow.push(currentVal.trim());
+                    if (currentRow.length > 0) rows.push(currentRow);
+                    currentRow = []; currentVal = '';
+                } else { currentVal += char; }
+            }
+            if (currentRow.length > 0) rows.push(currentRow);
+            return rows;
+        }
 
-<!-- Slide 11: Conclusion -->
-<div class="slide" id="s11">
-  <div class="emoji-art">✨</div>
-  <h2>Sonuç</h2>
-  <ul>
-    <li>Çin Odası: Sembol işleme ≠ Anlama</li>
-    <li>Searle: Bilgisayarlar gerçekten düşünemez</li>
-    <li>Karşı argümanlar güçlü, tartışma devam ediyor</li>
-    <li>LLM'ler soruyu daha da acil kılıyor</li>
-    <li>"Anlama" kavramını yeniden düşünmeliyiz</li>
-  </ul>
-  <p style="margin-top: 2rem; font-size: 1.5rem;">Teşekkürler! 🙏</p>
-  <p class="subtitle">Sorularınız?</p>
-</div>
+        async function fetchData() {
+            try {
+                const response = await fetch(sheetURL);
+                const data = await response.text();
+                const rows = parseCSV(data); 
 
-<!-- Slide 12: References -->
-<div class="slide" id="s12">
-  <h2>Kaynakça</h2>
-  <ul class="ref-list">
-    <li>Searle, J. R. (1980). "Minds, Brains, and Programs." <em>Behavioral and Brain Sciences</em>, 3(3), 417–457.</li>
-    <li>Cole, D. (2020). "The Chinese Room Argument." <em>Stanford Encyclopedia of Philosophy</em>.</li>
-    <li>Dennett, D. C. (1991). <em>Consciousness Explained</em>. Little, Brown and Company.</li>
-  </ul>
-</div>
+                wishlist = [];
+                completedWishlist = [];
+                foods = []; 
 
-<!-- Navigation -->
-<div class="nav">
-  <button onclick="prev()">← Geri</button>
-  <button onclick="next()">İleri →</button>
-</div>
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (row.length < 2) continue; 
+                    
+                    if (row[0] && row[0] !== "Rest_Name") {
+                        foods.push({ name: row[0], link: row[1] || "", img: row[2] || "", type: (row[3] || "Both").trim() });
+                    }
+                    if (row[4]) memes.push(row[4]);
+                    if (row[5] && row[5].toLowerCase() !== "watch_title") {
+                        watchlist.push({ title: row[5], link: row[6] || "#" });
+                    }
 
-<script>
-  let current = 0;
-  const slides = document.querySelectorAll('.slide');
-  const total = slides.length;
+                    if (i === 2 && row[7]) nextPeriodDate = row[7];
 
-  function show(n) {
-    slides[current].classList.remove('active');
-    current = (n + total) % total;
-    slides[current].classList.add('active');
-    document.getElementById('progress').style.width = ((current + 1) / total * 100) + '%';
-    document.getElementById('slideNum').textContent = (current + 1) + ' / ' + total;
-  }
+                    let wishItem = row[8];
+                    if (wishItem && wishItem.length > 1 && wishItem.toLowerCase() !== "wishlist_item" && wishItem.toLowerCase() !== "item") {
+                        if (wishItem.includes('✅')) {
+                            completedWishlist.push(wishItem);
+                        } else {
+                            wishlist.push(wishItem);
+                        }
+                    }
+                }
 
-  function next() { show(current + 1); }
-  function prev() { show(current - 1); }
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('content').style.display = 'flex';
+                updatePeriodCountdown(); renderWatchlist(); renderWishlist(); renderRoutine();
+            } catch (error) { 
+                console.error(error); 
+                document.getElementById('loader').innerText = "Error loading data.";
+            }
+        }
 
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
-    if (e.key === 'ArrowLeft') prev();
-  });
+        function renderWishlist() {
+            const container = document.getElementById('wishlist-container');
+            container.innerHTML = ""; // Clear it out
 
-  show(0);
-</script>
+            // 1. Render Active Wishlist
+            if (wishlist.length === 0) { 
+                container.innerHTML = "<p style='text-align:center;'>Wishlist boş! (Everything is bought! 🎉)</p>"; 
+            } else {
+                wishlist.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'wishlist-item';
+                    div.innerHTML = `<div class="rank-num">${index + 1}</div><span>${item}</span>`;
+                    container.appendChild(div);
+                });
+            }
 
+            // 2. Render Completed Wishlist
+            if (completedWishlist.length > 0) {
+                const header = document.createElement('div');
+                header.className = 'completed-header';
+                header.innerText = "💅 Spoiled Princess Things";
+                container.appendChild(header);
+
+                const completedContainer = document.createElement('div');
+                completedContainer.className = 'completed-list';
+
+                // We reverse the array here so the newest completions sit at the top!
+                const reversedCompleted = [...completedWishlist].reverse();
+
+                reversedCompleted.forEach((item) => {
+                    const div = document.createElement('div');
+                    div.className = 'wishlist-item completed-item';
+                    div.innerHTML = `<span>${item}</span>`;
+                    completedContainer.appendChild(div);
+                });
+                
+                container.appendChild(completedContainer);
+            }
+        }
+        
+        function wishlistSubmitDone() {
+            const input = document.getElementById('wish-entry');
+            const newItem = input.value;
+            if (newItem) { wishlist.push(newItem); renderWishlist(); }
+            input.value = "";
+            const msg = document.getElementById('wish-success-msg');
+            msg.style.display = "block";
+            makeItRain('🛍️'); 
+            setTimeout(() => { msg.style.display = "none"; }, 3000);
+        }
+
+        function updatePlaceholder() {
+            const type = document.getElementById('task-type').value;
+            const input = document.getElementById('task-details');
+            const texts = {
+                "Yemek Söyle": "Ne yiceksin? (Burger, Sushi...)",
+                "Limit Arttır": "Ne kadar arttırayım? (💸)",
+                "Para At": "Ne kadar atim?",
+                "Essay Yaz": "Konu ne? Ne zamana?"
+            };
+            input.placeholder = texts[type] || "Detay yaz...";
+        }
+
+        function renderRoutine() {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayName = days[new Date().getDay()];
+            
+            const emojiMap = {
+                'Glutatyon': '💊', 'Glikolik asit': '🧪', 'Retinol': '🌙', 'Pirinc suyu': '🌾',
+                'Yuz maskesi + Glikolik asit': '🎭', 'Serbest cilt bakimi': '🧖‍♀️', 'SPF': '☀️',
+                'Yemek ye': '🥗', 'Su iç': '💧', "Ace'e foto at": '📸', 'C vit': '🍊'
+            };
+            const routineMap = {
+                'Monday': ['Glutatyon','C vit', 'Glikolik asit'], 'Tuesday': ['Glutatyon','C vit', 'Retinol'], 'Wednesday': ['Glutatyon','C vit', 'Pirinc suyu'],
+                'Thursday': ['Glutatyon','C vit', 'Retinol'], 'Friday': ['Glutatyon','C vit', 'Yuz maskesi + Glikolik asit'], 'Saturday': ['Glutatyon','C vit', 'Serbest cilt bakimi'], 'Sunday': ['Glutatyon','C vit', 'Retinol']
+            };
+
+            let dailyTasks = routineMap[dayName] || ['SPF'];
+            dailyTasks = dailyTasks.concat(['Yemek ye', 'Su iç', "Ace'e foto at"]);
+
+            const container = document.getElementById('routine-list');
+            container.innerHTML = "";
+            dailyTasks.forEach(item => {
+                const icon = emojiMap[item] || '✨';
+                const div = document.createElement('div');
+                div.className = 'routine-item';
+                div.innerHTML = `<span class="routine-emoji">${icon}</span> <span>${item}</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        function makeItRain(emoji) {
+            const container = document.getElementById('emoji-container');
+            for(let i=0; i<10; i++) {
+                const el = document.createElement('div');
+                el.innerText = emoji;
+                el.className = 'floating-emoji';
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.top = (Math.random() * 20 + 80) + 'vh'; 
+                el.style.animationDuration = (Math.random() * 1 + 1.5) + 's';
+                container.appendChild(el);
+                setTimeout(() => el.remove(), 2000);
+            }
+        }
+
+        function setFoodType(type) {
+            selectedFoodType = type;
+            document.querySelectorAll('.food-type-btn').forEach(btn => {
+                btn.style.opacity = '0.5';
+                btn.style.transform = 'scale(0.95)';
+            });
+            const activeBtn = type === 'Healthy' ? 'btn-healthy' : type === 'Dirty' ? 'btn-dirty' : 'btn-both';
+            document.getElementById(activeBtn).style.opacity = '1';
+            document.getElementById(activeBtn).style.transform = 'scale(1)';
+            document.getElementById('food-result').innerHTML = type === 'All' ? "Hepsinden seç!" : type === 'Healthy' ? "Sağlıklı yemek seç!" : "Pis yemek seç!";
+            document.getElementById('food-img-tag').style.display = 'none';
+            document.getElementById('food-link-btn').style.display = 'none';
+        }
+
+        function pickFood() {
+            if (foods.length === 0) return;
+            let filtered = foods;
+            if (selectedFoodType === 'Healthy') {
+                filtered = foods.filter(f => f.type === 'Healthy' || f.type === 'Both');
+            } else if (selectedFoodType === 'Dirty') {
+                filtered = foods.filter(f => f.type === 'Dirty' || f.type === 'Both');
+            }
+            if (filtered.length === 0) { document.getElementById('food-result').innerHTML = "Bu kategoride yemek yok!"; return; }
+            const random = filtered[Math.floor(Math.random() * filtered.length)];
+            document.getElementById('food-result').innerHTML = `Go eat: <b>${random.name}</b>`;
+            document.getElementById('food-result').style.color = "#ff85a2";
+            const imgTag = document.getElementById('food-img-tag');
+            if (random.img && random.img.length > 5) { imgTag.src = random.img; imgTag.style.display = 'block'; } else { imgTag.style.display = 'none'; }
+            const linkBtn = document.getElementById('food-link-btn');
+            if (random.link && random.link.startsWith('http')) { linkBtn.style.display = 'inline-block'; linkBtn.href = random.link; } else { linkBtn.style.display = 'none'; }
+        }
+
+        function pickMeme() {
+            if (memes.length === 0) return;
+            const random = memes[Math.floor(Math.random() * memes.length)];
+            const div = document.getElementById('meme-result');
+            if (random.startsWith('http')) div.innerHTML = `<img src="${random}" style="max-width:100%; border-radius:10px;">`; else div.innerText = random;
+        }
+
+        function renderWatchlist() {
+            const container = document.getElementById('watchlist-container');
+            if (watchlist.length === 0) { container.innerHTML = "<p>Nothing to watch yet!</p>"; return; }
+            watchlist.forEach(show => {
+                const a = document.createElement('a');
+                a.href = show.link; a.target = "_blank"; a.style.textDecoration = "none";
+                a.innerHTML = `<button class="btn watch-btn">🎬 ${show.title}</button>`;
+                container.appendChild(a);
+            });
+        }
+
+        function checkWaterDate() {
+            const todayStr = new Date().toDateString();
+            if (localStorage.getItem('lastSipDate') !== todayStr) { localStorage.setItem('waterCount', 0); localStorage.setItem('lastSipDate', todayStr); }
+            document.getElementById('water-count').innerText = localStorage.getItem('waterCount') || 0;
+        }
+        function addWater() {
+            let count = parseInt(localStorage.getItem('waterCount') || 0);
+            localStorage.setItem('waterCount', ++count); localStorage.setItem('lastSipDate', new Date().toDateString());
+            document.getElementById('water-count').innerText = count;
+        }
+
+        function updatePeriodCountdown() {
+            const el = document.getElementById('period-countdown');
+            if (!nextPeriodDate || nextPeriodDate.length < 5) { el.innerHTML = "<strong>Update Date</strong>"; return; }
+            
+            let target;
+            if (nextPeriodDate.includes('-')) {
+                const parts = nextPeriodDate.split('-');
+                if(parts.length === 3) target = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            } 
+            else if (nextPeriodDate.includes('.') || nextPeriodDate.includes('/')) {
+                const sep = nextPeriodDate.includes('.') ? '.' : '/';
+                const parts = nextPeriodDate.split(sep);
+                if(parts.length === 3) target = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+            }
+
+            if (!target || isNaN(target.getTime())) {
+                target = new Date(nextPeriodDate);
+            }
+
+            if (isNaN(target.getTime())) {
+                el.innerHTML = "<strong>Invalid Date</strong>";
+                console.log("Failed:", nextPeriodDate);
+                return;
+            }
+
+            const daysLeft = Math.ceil((target - new Date()) / (1000 * 60 * 60 * 24));
+            el.innerHTML = daysLeft < 0 ? "<strong>Late / Started</strong>" : `<strong>${daysLeft} days</strong> left`;
+        }
+
+        checkWaterDate();
+        fetchData();
+        updatePlaceholder();
+    </script>
 </body>
 </html>
