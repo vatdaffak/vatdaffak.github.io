@@ -116,6 +116,30 @@
             0%, 100% { opacity: 0.4; transform: scale(0.9); }
             50% { opacity: 1; transform: scale(1.1); }
         }
+        @keyframes petalFall {
+            0%   { transform: translateY(-8vh) translateX(0) rotate(0deg); opacity: 0; }
+            8%   { opacity: 0.75; }
+            92%  { opacity: 0.75; }
+            100% { transform: translateY(108vh) translateX(40px) rotate(360deg); opacity: 0; }
+        }
+        .ambient-petal {
+            position: fixed; top: 0; left: 0;
+            pointer-events: none;
+            z-index: 1;
+            animation: petalFall linear forwards;
+            will-change: transform, opacity;
+        }
+
+        .shake-hint {
+            display: none;
+            font-size: 0.8rem;
+            color: var(--text-soft);
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        @media (hover: none) and (pointer: coarse) {
+            .shake-hint { display: block; }
+        }
 
         /* ==========  🌸 BASE  ========== */
         * { box-sizing: border-box; }
@@ -139,7 +163,7 @@
             transition: background 0.5s ease;
         }
 
-        .container { max-width: 500px; width: 100%; display: flex; flex-direction: column; gap: 15px; position: relative; }
+        .container { max-width: 500px; width: 100%; display: flex; flex-direction: column; gap: 15px; position: relative; z-index: 2; }
 
         .card {
             background: var(--card-bg);
@@ -492,6 +516,7 @@
                     <button class="btn food-pick-btn" onclick="pickFood()">🎲 Pick Random</button>
                     <a id="food-link-btn" href="#" target="_blank" class="btn food-order-btn" style="display:none;">Sipariş ver 🛵</a>
                 </div>
+                <p class="shake-hint">📱 or shake to surprise</p>
             </div>
 
             <div class="card">
@@ -880,6 +905,65 @@
             const daysLeft = Math.ceil((target - new Date()) / (1000 * 60 * 60 * 24));
             el.innerHTML = daysLeft < 0 ? "<strong>Late / Started</strong>" : `<strong>${daysLeft} days</strong> left`;
         }
+
+        /* ==========  📳 HAPTICS  ========== */
+        function buzz(ms) {
+            if (navigator.vibrate) navigator.vibrate(ms || 8);
+        }
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('button, .btn, .theme-swatch, .food-pill, a.watch-btn')) buzz(8);
+        });
+
+        /* ==========  🌸 AMBIENT PETALS  ========== */
+        const petalEmojis = ['🌸','🌺','💕','✨','🌷','💖','🦋'];
+        function spawnPetal() {
+            const el = document.createElement('div');
+            el.className = 'ambient-petal';
+            el.innerText = petalEmojis[Math.floor(Math.random() * petalEmojis.length)];
+            el.style.left = (Math.random() * 95) + 'vw';
+            el.style.fontSize = (Math.random() * 0.7 + 1.0) + 'rem';
+            const dur = Math.random() * 6 + 9;
+            el.style.animationDuration = dur + 's';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), dur * 1000 + 500);
+        }
+        // Seed a few so it's not empty on load
+        for (let i = 0; i < 3; i++) {
+            setTimeout(spawnPetal, i * 1500);
+        }
+        setInterval(spawnPetal, 2200);
+
+        /* ==========  📱 SHAKE TO PICK FOOD  ========== */
+        let shakeReady = false;
+        let lastShake = 0;
+        function onShake(e) {
+            const a = e.accelerationIncludingGravity;
+            if (!a) return;
+            const mag = Math.sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
+            const now = Date.now();
+            if (mag > 25 && now - lastShake > 1500) {
+                lastShake = now;
+                buzz(30);
+                pickFood();
+                const card = document.querySelector('.food-card');
+                if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        async function enableShake() {
+            if (shakeReady) return;
+            if (typeof DeviceMotionEvent !== 'undefined' &&
+                typeof DeviceMotionEvent.requestPermission === 'function') {
+                try {
+                    const p = await DeviceMotionEvent.requestPermission();
+                    if (p !== 'granted') return;
+                } catch (e) { return; }
+            }
+            window.addEventListener('devicemotion', onShake);
+            shakeReady = true;
+        }
+        // iOS requires a user gesture; piggyback on first tap
+        document.addEventListener('click', enableShake, { once: true });
+        document.addEventListener('touchstart', enableShake, { once: true });
 
         updateGreeting();
         setInterval(rotateAce, 3500);
