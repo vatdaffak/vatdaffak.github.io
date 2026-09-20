@@ -533,7 +533,7 @@ const fmt = n => n.toLocaleString('en-GB', {minimumFractionDigits: Number.isInte
 const CURRENCY = ' TRY';                                   // shown after every money amount; set to '' for plain credits
 const money = n => fmt(n) + CURRENCY;
 const BETS = [18,36,90,180,360,900,1800];
-const START = 50000, KEY = 'dolyslot.v1';
+const START = 50000, KEY = 'dolyslot.v2';
 
 let S = {balance:START, betIdx:0, muted:false, music:true, quick:false, life:{spins:0,wagered:0,won:0,refills:0}};
 try { const j = JSON.parse(localStorage.getItem(KEY)); if (j) S = Object.assign(S, j, {life:Object.assign(S.life, j.life)}); } catch(e){}
@@ -824,7 +824,8 @@ function hud() {
   $('#bSound').style.opacity = S.muted ? .35 : 1;
 }
 function controls() {
-  $('#betDn').disabled = busy || S.betIdx === 0; $('#betUp').disabled = busy || S.betIdx === BETS.length - 1;
+  const lock = busy || !S.bdayDone;   // the bet cannot be changed during the birthday game
+  $('#betDn').disabled = lock || S.betIdx === 0; $('#betUp').disabled = lock || S.betIdx === BETS.length - 1;
   $('#spin').classList.toggle('spinning', busy && !auto); $('#spin').classList.toggle('auto', auto > 0);
   $('#bAuto').textContent = auto > 0 ? 'STOP ' + auto : 'AUTOPLAY';
 }
@@ -1188,8 +1189,8 @@ function infoModal() {
 }
 
 $('#spin').onclick = () => { if (auto > 0) { auto = 0; controls(); msg(''); } else play(); };
-$('#betDn').onclick = () => { if (!busy && S.betIdx > 0) { S.betIdx--; hud(); controls(); save(); sfx.tick(); } };
-$('#betUp').onclick = () => { if (!busy && S.betIdx < BETS.length - 1) { S.betIdx++; hud(); controls(); save(); sfx.tick(); } };
+$('#betDn').onclick = () => { if (!busy && S.bdayDone && S.betIdx > 0) { S.betIdx--; hud(); controls(); save(); sfx.tick(); } };
+$('#betUp').onclick = () => { if (!busy && S.bdayDone && S.betIdx < BETS.length - 1) { S.betIdx++; hud(); controls(); save(); sfx.tick(); } };
 $('#bMenu').onclick = () => { $('#autoMenu').classList.remove('on'); $('#menu').classList.toggle('on'); };
 $('#bAuto').onclick = () => { if (auto > 0) { auto = 0; controls(); msg(''); return; } $('#menu').classList.remove('on'); $('#autoMenu').classList.toggle('on'); };
 $('#autoMenu').querySelectorAll('button').forEach(bn => bn.onclick = () => { auto = +bn.dataset.n; closeMenus(); controls(); if (!busy) play(); });
@@ -1213,6 +1214,7 @@ for (const k of ['phoenix','dragon','turtle','koi','toad','wild','lion','scatter
 }
 document.querySelectorAll('#nice .nl, #jpIntro .jm span').forEach(e => { e.innerHTML = LION; });
 if (FRESH) { S.betIdx = 0; S.balance = BIRTHDAY.startBets * BETS[0]; }
+if (!S.bdayDone) S.betIdx = 0;
 hud(); controls(); setWin(0); msg('GOOD LUCK DOLY ♡');
 })();
 </script>
