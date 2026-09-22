@@ -340,6 +340,17 @@ button{touch-action:manipulation}
 @keyframes turn{0%,25%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
 @media (orientation:portrait) and (max-width:900px){#rotate{display:flex}}
 @supports (-webkit-touch-callout:none){.reel.blur .strip{filter:blur(3px)}}
+.coin.gone{visibility:hidden}
+.coins.gifts{top:76px;width:800px;margin-left:-400px;grid-template-columns:repeat(4,1fr);gap:6px 0}
+.coins.gifts .coin{width:122px;height:122px}
+.coin .bk .gift{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 40% 30%,#fff,#ffe3ef 70%);border:5px solid #ff9ec4;box-shadow:0 6px 14px #a03a7055;display:flex;align-items:center;justify-content:center}
+.coin .bk .gift img{width:86%;height:86%;object-fit:contain;filter:drop-shadow(0 3px 3px #a03a7044)}
+.coin .bk .gift i{position:absolute;left:0;right:0;bottom:0;padding:14px 4px 10px;font-style:normal;font-size:13px;line-height:1.1;font-weight:900;color:#fff;text-shadow:0 1px 2px #a03a70;background:linear-gradient(#e0508a00,#e0508acc 45%)}
+.coin.hit .bk .gift{border-color:#ffd84a;box-shadow:0 0 24px #ffe07a}
+.cg.gf .cgt{font-size:44px;margin-top:-10px}.cg.gf .cgs{font-size:28px}
+.prize{margin:2px 0 6px}
+.prize img{width:760px;max-height:190px;object-fit:contain;filter:drop-shadow(0 10px 14px #a03a7055);animation:bob 1.4s ease-in-out infinite alternate}
+.prize b{display:block;font-size:52px;line-height:1.1;color:#fff;filter:drop-shadow(0 3px 0 #c0407a)}.prize span{display:block;font-size:26px;color:#fff;text-shadow:0 2px 0 #c0407a;margin-top:6px}
 /* notes from Ace */
 #note{position:absolute;z-index:12;pointer-events:none;opacity:0;display:flex;align-items:center;gap:10px;transform:translate(-50%,-50%)}
 #note.on{animation:notefly 3.2s ease-out forwards}
@@ -533,7 +544,7 @@ const fmt = n => n.toLocaleString('en-GB', {minimumFractionDigits: Number.isInte
 const CURRENCY = ' TRY';                                   // shown after every money amount; set to '' for plain credits
 const money = n => fmt(n) + CURRENCY;
 const BETS = [18,36,90,180,360,900,1800];
-const START = 50000, KEY = 'dolyslot.v2';
+const START = 50000, KEY = 'dolyslot.v3';
 
 let S = {balance:START, betIdx:0, muted:false, music:true, quick:false, life:{spins:0,wagered:0,won:0,refills:0}};
 try { const j = JSON.parse(localStorage.getItem(KEY)); if (j) S = Object.assign(S, j, {life:Object.assign(S.life, j.life)}); } catch(e){}
@@ -942,12 +953,13 @@ async function niceBanner(win, b, meterFrom = 0) {
 const panel = $('#panel');
 function panelOpen(html) { panel.innerHTML = html; panel.classList.remove('on'); panel.offsetWidth; panel.classList.add('on'); }
 function panelClose() { panel.classList.remove('on'); panel.innerHTML = ''; }
+const giftHTML = k => `<div class="gift"><img src="assets/gifts/${k}.png" alt=""></div>`;
 const badgeHTML = k => `<div class="bdg k-${k}"><span>${art('bank', INGOT)}</span><i class="gtxt">${k === 'bday' ? 'DOLY ♡' : k.toUpperCase()}</i></div>`;
 async function congrats(amount, extra, bday) {
   let sideRain = null;
   if (bday) { rainUntil = 0; founts.length = 0; P.length = 0;   // keep the message readable: coins only fall down the side margins
     sideRain = setInterval(() => { coin(Math.random() < .5 ? rnd(120) : 1160 + rnd(120), -20, Math.random() - .5, 2 + Math.random() * 3); kick(); }, 70); }
-  panelOpen(bday ? `<div class="cg bd"><div class="cgt gtxt">${BIRTHDAY.title}</div><div class="cgv gtxt">${money(amount)}</div>${BIRTHDAY.lines.map(l => `<div class="cgs">${l}</div>`).join('')}<div class="cgp" id="ok">PRESS ANYWHERE TO CONTINUE</div></div>`
+  panelOpen(bday ? `<div class="cg bd${BIRTHDAY.gifts ? ' gf' : ''}"><div class="cgt gtxt">${BIRTHDAY.title}</div>${BIRTHDAY.gifts ? `<div class="prize"><img src="assets/gifts/${BIRTHDAY.prize}_wide.png" alt=""></div>` : `<div class="cgv gtxt">${money(amount)}</div>`}${BIRTHDAY.lines.map(l => `<div class="cgs">${l}</div>`).join('')}<div class="cgp" id="ok">PRESS ANYWHERE TO CONTINUE</div></div>`
     : `<div class="cg"><div class="cgt gtxt">CONGRATS DOLY ♡</div><div class="cgs">YOU HAVE WON</div><div class="cgv gtxt">${money(amount)}</div>${extra || ''}<div class="cgp" id="ok">PRESS ANYWHERE TO CONTINUE</div></div>`);
   await Promise.race([waitClick(panel), sleep(bday ? 600000 : auto ? 2500 : 60000)]);
   if (sideRain) clearInterval(sideRain);
@@ -975,30 +987,32 @@ async function pickBonus(tier, b, preview) {
   await sleep(1700); flash();
   intro.classList.remove('on'); reelsEl.classList.remove('dimmed');
   founts.length = 0; P.length = 0;   // no leftover intro coins over the pick panel
-  const bday = tier.k === 'bday', kinds = [bday ? 'bday' : 'grand','major','minor']; let deck;
-  do { deck = kinds.flatMap(k => [k,k,k]).sort(() => Math.random() - .5); } while (kinds.some(k => k !== tier.k && deck.lastIndexOf(k) < deck.lastIndexOf(tier.k)));
+  const bday = tier.k === 'bday', gift = bday && BIRTHDAY.gifts, kinds = gift ? Object.keys(BIRTHDAY.gifts) : [bday ? 'bday' : 'grand','major','minor']; let deck;
+  if (gift) { deck = BIRTHDAY.reveal.slice(); const rest = kinds.filter(k => k !== BIRTHDAY.prize); while (deck.length < BIRTHDAY.coins) deck.push(rest[deck.length % rest.length]); }
+  else do { deck = kinds.flatMap(k => [k,k,k]).sort(() => Math.random() - .5); } while (kinds.some(k => k !== tier.k && deck.lastIndexOf(k) < deck.lastIndexOf(tier.k)));
   panelOpen(`<div class="pkh gtxt">PICK COINS TO OPEN THE ACEBANK<br>MATCH 3 TO WIN</div>
-    <div class="coins">${deck.map((_, i) => `<button class="coin" style="animation-delay:${.25 + i * .07}s"><div class="f fr"></div><div class="f bk"></div></button>`).join('')}</div>`);
-  for (let i = 0; i < 9; i++) setTimeout(() => sfx.stop(), 700 + i * 70);
+    <div class="coins${gift ? ' gifts' : ''}">${deck.map((_, i) => `<button class="coin" style="animation-delay:${.2 + i * .06}s"><div class="f fr"></div><div class="f bk"></div></button>`).join('')}</div>`);
+  for (let i = 0; i < deck.length; i++) setTimeout(() => sfx.stop(), 700 + i * 60);
   let n = 0; const found = Object.fromEntries(kinds.map(k => [k, 0]));
-  const open = (c, k, dim) => { c.querySelector('.bk').innerHTML = badgeHTML(k); c.dataset.k = k; c.style.animation = 'none'; c.classList.add('open'); if (dim) c.classList.add('dim'); };
+  const open = (c, k, dim) => { c.querySelector('.bk').innerHTML = gift ? giftHTML(k) : badgeHTML(k); c.dataset.k = k; c.style.animation = 'none'; c.classList.add('open'); if (dim) c.classList.add('dim'); };
   await new Promise(done => {
     panel.querySelectorAll('.coin').forEach(c => c.addEventListener('click', () => {
       if (c.classList.contains('open') || found[tier.k] >= 3) return;
-      const k = deck[n++]; open(c, k); sfx.flip(); sfx.reveal(k);
+      const k = deck[n++]; open(c, k); sfx.flip(); sfx.reveal(gift ? (k === BIRTHDAY.prize ? 'grand' : 'minor') : k);
       if (++found[k] === 3) setTimeout(done, 800);
     }));
   });
-  panel.querySelectorAll(`.coin[data-k="${tier.k}"]`).forEach(e => e.classList.add('hit'));
+  panel.querySelectorAll(`.coin[data-k="${gift ? BIRTHDAY.prize : tier.k}"]`).forEach(e => e.classList.add('hit'));
   sfx.gongS(); burst(640, 374, 30, 12); await sleep(900);
-  panel.querySelectorAll('.coin:not(.open)').forEach(c => open(c, deck[n++], true));
+  panel.querySelectorAll('.coin:not(.open)').forEach(c => open(c, gift ? c.classList.add('gone') : deck[n++], true));
   await sleep(1500);
   const win = bday ? tier.amount : tier.x * b;
-  if (bday) { S.balance = r2(S.balance + win); S.gift = (S.gift || 0) + win; hud(); } else credit(win);   // the gift is not counted as winnings
+  if (bday) { S.gift = win; hud(); } else credit(win);   // birthday: the banner counts up for the show, the real gift is the Airwrap; no credits are added
   await niceBanner(win, b);
   await congrats(win, badgeHTML(tier.k), bday);
   if (bday && !preview) { S.bdayDone = true; save(); }
-  heads.forEach(h => h.classList.remove('lit')); setWin(win);
+  heads.forEach(h => h.classList.remove('lit')); setWin(bday ? 0 : win);
+  if (bday && !preview) { S.balance = START; hud(); save(); msg('CREDIT TOPPED UP FOR FUN · GOOD LUCK DOLY ♡'); }   // she can keep playing afterwards
 }
 
 async function chooseFS() {
@@ -1056,7 +1070,7 @@ async function freeSpins(res, b) {
 // ---------- little notes from Ace on some no-win spins ----------
 // Edit freely. The first six are rotating banner lines from doly.fun; the rest are extras in the same spirit.
 const NOTES = [
-  "ace loves you 💞", "sen dunyanin en gzl kizisin", "ace: ilysm 💗", "miu", "AAAAAAAAAAAAAAAAAAA", "AAAAAAAAAA",
+  "onr loves you 💞", "sen dunyanin en gzl kizisin", "ace: ilysm 💗", "miu", "AAAAAAAAAAAAAAAAAAA", "AAAAAAAAAA",
   "hi doly 🥹💖", "you're my jackpot 💗", "prettiest player ever ✨", "ace is proud of you 🌸", "drink some water, cutie 💧", "miu miu 🐾",
 ];
 const NOTE_CHANCE = .25, NOTE_CHANCE_FS = .12;   // share of no-win spins that get a note
@@ -1079,9 +1093,14 @@ const BIRTHDAY = {
   startBets: 10,                                   // she starts with this many bets' worth of credit (10 x 18 = 180)
   title: "doom gunun kutlu olsun dolimmm 🎂🎉",   // "doom" is on purpose
   lines: ["iyi ki dogdun 🥳💖", "ilysm 💗✨"],
+  // gift version of the AceBank pick: 12 coins, reveals follow this exact order whichever coin she taps; the game ends on the 3rd prize
+  gifts: {dishwasher:"Bulasik Mak.", perfume:"Prada Parfum", kettle:"Kettle", jean:"Jean", dyson:"Dyson Airwrap"},
+  prize: "dyson",
+  reveal: ["dishwasher","perfume","kettle","dishwasher","jean","jean","kettle","perfume","dyson","dyson","dyson"],
+  coins: 12,
   // one entry per spin: 'lose' = nothing, {win:n} = a win of exactly n bets, a text = no win + that note, 'bank' = the AceBank bonus.
   // Credits in bets: 10 at the start, 13 spins lose one each, wins give back 6, so the 16th spin spends her last credit.
-  script: ['lose', {win:2}, "hi doly 🥹💖", 'lose', 'lose', {win:1}, "ace loves you 💞", 'lose', "sen dunyanin en gzl kizisin", {win:3}, 'lose', "ace: ilysm 💗", 'lose', 'lose', "you're my jackpot 💗", 'bank'],
+  script: ['lose', {win:2}, "hi doly 🥹💖", 'lose', 'lose', {win:1}, "onr loves you 💞", 'lose', "sen dunyanin en gzl kizisin", {win:3}, 'lose', "ace: ilysm 💗", 'lose', 'lose', "you're my jackpot 💗", 'bank'],
 };
 const BDAY_TIER = {k:'bday', amount: BIRTHDAY.amount};
 function birthdayStep(preview) {
@@ -1164,7 +1183,7 @@ function statsModal() {
   const m = overlay(`<h2>STATS</h2>
     <table><tr><th></th><th>SPINS</th><th>STAKED</th><th>WON</th><th>NET</th><th>RETURN</th></tr>
     ${row('This session', session)}${row('All time', S.life)}</table>
-    <p>Session length: ${mins} min · refills used: ${S.life.refills}${S.gift ? ` · birthday gift from Ace 🎂: ${money(S.gift)} (not counted as winnings)` : ''}</p>
+    <p>Session length: ${mins} min · refills used: ${S.life.refills}${S.gift ? ` · birthday gift from Ace 🎂 (not counted as winnings)` : ''}</p>
     <div class="note">This game is tuned to pay back <b>${(ENGINE.TARGET_RTP * 100).toFixed(1)}%</b> of stakes in the long run, the same as real online slots.
     That means every 100 staked loses about ${(100 - ENGINE.TARGET_RTP * 100).toFixed(1)} on average, and the longer you play, the closer NET gets to that.
     With real money, the NET column is what would be gone from your bank account.</div>
