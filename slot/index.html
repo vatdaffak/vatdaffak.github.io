@@ -351,6 +351,7 @@ button{touch-action:manipulation}
 .prize{margin:2px 0 6px}
 .prize img{width:760px;max-height:190px;object-fit:contain;filter:drop-shadow(0 10px 14px #a03a7055);animation:bob 1.4s ease-in-out infinite alternate}
 .prize b{display:block;font-size:52px;line-height:1.1;color:#fff;filter:drop-shadow(0 3px 0 #c0407a)}.prize span{display:block;font-size:26px;color:#fff;text-shadow:0 2px 0 #c0407a;margin-top:6px}
+#nice .nbar b.lbl{display:flex;align-items:center;justify-content:center;height:82px}#nice .nbar b.lbl img{height:64px;width:auto;max-width:600px;filter:drop-shadow(0 4px 6px #0006)}#nice .nbar b.p{animation:pop .5s cubic-bezier(.2,1.8,.4,1)}
 /* notes from Ace */
 #note{position:absolute;z-index:12;pointer-events:none;opacity:0;display:flex;align-items:center;gap:10px;transform:translate(-50%,-50%)}
 #note.on{animation:notefly 3.2s ease-out forwards}
@@ -936,17 +937,18 @@ function overlay(html) { $('#modal').innerHTML = html; $('#overlay').classList.a
 function closeOverlay() { $('#overlay').classList.remove('on'); }
 
 // NICE! banner: red count-up bar flanked by two gold lions
-async function niceBanner(win, b, meterFrom = 0) {
+async function niceBanner(win, b, meterFrom = 0, finalLabel) {
   const el = $('#nice'), t = el.querySelector('.nt'), ctl = {skip:false}; let tier = '';
   const setTier = v => { const n = v / b >= 75 ? 'AMAZING!' : v / b >= 30 ? 'GREAT!' : 'NICE!';
     if (n !== tier) { tier = n; t.textContent = n; t.classList.remove('p'); t.offsetWidth; t.classList.add('p'); burst(640, 430, 16, 11); if (n !== 'NICE!') { sfx.gongS(); flash(); } } };
   const x = win / b, ms = x >= 75 ? 9000 : x >= 30 ? 6500 : 4200;
   el.classList.add('on'); sfx.big(); setTimeout(() => say('bigwin'), 400);   // shout lands as the title slams in, after the banner is up fountain(640, 470, ms, .35);
   const skip = () => { ctl.skip = true; }; el.addEventListener('click', skip);
-  await Promise.all([countTo($('#nv'), 0, win, ms, true, setTier, ctl), countTo($('#win'), meterFrom, meterFrom + win, ms, false, null, ctl)]);
+  await Promise.all([countTo($('#nv'), 0, win, ms, true, setTier, ctl), finalLabel ? sleep(0) : countTo($('#win'), meterFrom, meterFrom + win, ms, false, null, ctl)]);
   el.removeEventListener('click', skip); founts.length = 0;
+  if (finalLabel) { $('#nv').innerHTML = finalLabel; $('#nv').classList.add('lbl'); $('#nv').classList.remove('p'); $('#nv').offsetWidth; $('#nv').classList.add('p'); sfx.gongS(); burst(640, 430, 30, 12); }
   await Promise.race([waitClick(el), sleep(auto || fsMode ? 1600 : 4000)]);
-  el.classList.remove('on');
+  el.classList.remove('on'); $('#nv').classList.remove('lbl', 'p');
 }
 
 // red panel inside the frame (jackpot pick game, congratulations screens)
@@ -1008,7 +1010,7 @@ async function pickBonus(tier, b, preview) {
   await sleep(1500);
   const win = bday ? tier.amount : tier.x * b;
   if (bday) { S.gift = win; hud(); } else credit(win);   // birthday: the banner counts up for the show, the real gift is the Airwrap; no credits are added
-  await niceBanner(win, b);
+  await niceBanner(win, b, 0, bday && BIRTHDAY.gifts ? `<img src="assets/gifts/${BIRTHDAY.prize}_wide.png" alt="">` : null);
   await congrats(win, badgeHTML(tier.k), bday);
   if (bday && !preview) { S.bdayDone = true; save(); }
   heads.forEach(h => h.classList.remove('lit')); setWin(bday ? 0 : win);
