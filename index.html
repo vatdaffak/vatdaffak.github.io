@@ -419,7 +419,12 @@
         }
 
         #wish-success-msg { color: #2ed573; }
-    </style>
+    .slot-btn{display:block;text-align:center;text-decoration:none;font-size:1.35em;font-weight:800;padding:18px;border-radius:20px;color:#fff;
+  background:linear-gradient(135deg,#ff9ec4,#cdb4ff,#ffd86a,#ff9ec4);background-size:300% 300%;animation:slotGlow 3s ease infinite,slotBounce 1.6s ease-in-out infinite alternate;
+  box-shadow:0 8px 24px rgba(224,80,138,.35);text-shadow:0 2px 0 rgba(160,58,112,.5)}
+@keyframes slotGlow{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+@keyframes slotBounce{from{transform:scale(1)}to{transform:scale(1.04)}}
+</style>
 </head>
 <body class="theme-peach">
 
@@ -451,6 +456,8 @@
         <div id="loader">Loading... 💖</div>
 
         <div id="content" style="display: none; flex-direction: column; gap: 15px;">
+
+            <a href="/slot/" class="btn slot-btn" onclick="makeItRain('🎂')">🎰 doom gunu slotu 🎂</a>
 
             <div class="card">
                 <h2>🛍️ Wishlist</h2>
@@ -530,12 +537,6 @@
             <div class="card">
                 <h2>📺 Watch List</h2>
                 <div id="watchlist-container"></div>
-            </div>
-
-            <div class="card">
-                <h2>🎰 Doly's Lucky Lions</h2>
-                <p style="margin:0 0 10px;opacity:.85">doly'nin kendi slot oyunu 🦁💖 telefonu yan cevir</p>
-                <a class="btn" href="/slot/" style="display:block;text-align:center;text-decoration:none;background: var(--accent); color: #5a4a2a;">🎀 Oyna</a>
             </div>
 
             <div class="card">
